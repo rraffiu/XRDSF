@@ -57,14 +57,25 @@ def pdf(x, mu, sig):
 q = linspace(0,10,200)
 sf = 0.0*q
 
-final = empty([len(gdat)])
+final = empty([len(gdat),5])
 for i in range(len(gdat)):
+    final[i,0:4] = ints[ind[i],0:4]
+    psum = 0.0
     for j in range(ind[i],ind[i]+cnt[i]):
-        final[i] += ints[j,4]
+        psum += ints[j,4]
         sf += pdf(q,gdat[i],0.05)*ints[j,4]
+    final[i,4] = psum
+
+final[:,0:3] = -sort(-abs(final[:,0:3]))
+
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 plt.plot(q,sf)
+for i, p in enumerate(final[:,4]):
+    if p > 4.1:
+        lbl = '['+str(final[i,0].astype(int))+str(final[i,1].astype(int))+str(final[i,2].astype(int))+']'
+        plt.annotate(lbl, (final[i,3], final[i,4]+10),rotation=90)
 plt.xlabel(r"q (\AA$^{-1}$)")
 plt.ylabel('Intensity (arb. units)')
+plt.margins(0.05,0.1)
 plt.show(block=False)
