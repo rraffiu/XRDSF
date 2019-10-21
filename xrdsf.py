@@ -9,7 +9,7 @@ from ase.io import read
 from numpy import *
 from operator import itemgetter
 from matplotlib import pyplot as plt
-
+import formfactor as ff
 """
 How to run:
 
@@ -26,7 +26,6 @@ if format_in == 'vasp':
     obj = read(file_in,format=format_in)
 else:
     exit('ERROR:The program only reads vasp format for now.')
-
 # Get the reciprocal cell/vectors
 rcell    = 2*pi*linalg.inv(obj.cell).T
 amp_rvec = linalg.norm(rcell,axis=1)
@@ -51,9 +50,6 @@ idx = argsort(ints[:,3])
 ints = ints[idx,:]
 gdat, ind, cnt = unique(ints[:,3].round(decimals=2),return_index=True,return_counts=True)
 
-def pdf(x, mu, sig):
-    return exp(-power((x - mu)/sig, 2.)/2)
-
 q = linspace(0,10,200)
 sf = 0.0*q
 
@@ -63,7 +59,7 @@ for i in range(len(gdat)):
     psum = 0.0
     for j in range(ind[i],ind[i]+cnt[i]):
         psum += ints[j,4]
-        sf += pdf(q,gdat[i],0.05)*ints[j,4]
+        sf += ff.pdf(q,gdat[i])*ints[j,4]
     final[i,4] = psum
 
 final[:,0:3] = -sort(-abs(final[:,0:3]))
