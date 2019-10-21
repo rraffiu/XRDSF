@@ -14,7 +14,7 @@ import formfactor as ff
 """
 How to run:
 
-python xrdfs.py inputfile format
+python xrdfs.py inputfile format  msd
 
     inputfile: contains lattice vectors and basis (atomic positions) in some standard format.
     format:    Format of the input file. For example 'vasp' for CONTCAR.
@@ -22,7 +22,7 @@ python xrdfs.py inputfile format
 
 file_in = sys.argv[1]
 format_in = sys.argv[2]
-
+msd      = float(sys.argv[3])   # in Angstroms
 if format_in == 'vasp':
     obj = read(file_in,format=format_in)
 else:
@@ -43,10 +43,11 @@ for h in  range(-hklmax[0],hklmax[0]+1):
             strfac = 0.0
             for d in range(natoms):
                 proj = dot(G,obj.positions[d])
-                gabs = dot(G,G)
+                gabs = linalg.norm(G)
                 sym  = obj.get_chemical_symbols()[d]
                 strfac += ff.eaff(sym,gabs)*exp(proj*1j)
-            ints[indx,:] = [h,k,l,linalg.norm(G), abs(strfac)**2]
+                dwf = exp(-msd*gabs**2)
+            ints[indx,:] = [h,k,l,gabs, abs(strfac*dwf)**2]
             indx +=1
 
 idx = argsort(ints[:,3])
@@ -69,7 +70,7 @@ final[:,0:3] = -sort(-abs(final[:,0:3]))
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
-plt.xlim(1, 6)
+plt.xlim(1, 8)
 plt.yticks([])
 plt.plot(q,sf)
 for i, p in enumerate(final[:,4]):
