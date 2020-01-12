@@ -4,6 +4,7 @@ of the atoms (basis) and returns structure factor
 for any general system.
 """
 
+from __future__ import print_function
 import sys
 from ase.io import read
 from numpy import *
@@ -46,7 +47,7 @@ for h in  range(-hklmax[0],hklmax[0]+1):
                 gabs = linalg.norm(G)
                 sym  = obj.get_chemical_symbols()[d]
                 strfac += ff.eaff(sym,gabs)*exp(proj*1j)
-                dwf = exp(-msd*gabs**2)
+                dwf = exp(-msd*gabs**2/3)
             ints[indx,:] = [h,k,l,gabs, abs(strfac*dwf)**2]
             indx +=1
 
@@ -68,16 +69,18 @@ for i in range(len(gdat)):
 
 final[:,0:3] = -sort(-abs(final[:,0:3]))
 
+plt.interactive(True)
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
-plt.xlim(1, 8)
+plt.xlim(1, 10)
 plt.yticks([])
 plt.plot(q,sf)
 for i, p in enumerate(final[:,4]):
     if p > 4:
         lbl = '['+str(final[i,0].astype(int))+str(final[i,1].astype(int))+str(final[i,2].astype(int))+']'
         plt.annotate(lbl, (final[i,3]+0.1, final[i,4]*30),rotation=90)
-        print(final[i,3],final[i,4])
+        print('{0:12.6f} '.format(final[i,4]),end='')
+print()
 plt.xlabel(r"q (\AA$^{-1}$)")
 plt.ylabel('Intensity (arb. units)')
 plt.margins(0.05,0.1)

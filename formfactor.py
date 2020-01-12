@@ -2,19 +2,19 @@ import pandas as pd
 from numpy import *
 import sys
 
-urlpc = "https://raw.github.com/rraffiu/XRDSF/master/point.csv"
-df = pd.read_csv(urlpc,index_col=2)
+#urlpc = "https://raw.github.com/rraffiu/XRDSF/master/point.csv"
+#df = pd.read_csv(urlpc,index_col=2)
 
-urlea ="https://raw.github.com/rraffiu/XRDSF/master/expdata.csv"
-df = pd.read_csv(urlea,index_col=0)
-df.index=df.index.str.strip()
+#urlea ="https://raw.github.com/rraffiu/XRDSF/master/expdata.csv"
+df = pd.read_csv('trimed.csv',index_col=0)
+#df.index=df.index.str.strip()
 
 def eaff(sym,k):
     try:
         el=df.loc[sym]
     except:
         sys.exit("ERROR: Incorrect symbol ("+sym+") or no data available for this element.")
-    el = el.str.strip()
+#    el = el.str.strip()
     a1=float(el.loc['a1'])
     a2=float(el.loc['a2'])
     a3=float(el.loc['a3'])
