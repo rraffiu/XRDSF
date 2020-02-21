@@ -8,7 +8,6 @@ from __future__ import print_function
 import sys
 from ase.io import read
 from numpy import *
-from scipy.stats import cauchy
 from operator import itemgetter
 from matplotlib import pyplot as plt
 import formfactor as ff
@@ -20,7 +19,7 @@ python xrdfs.py inputfile format  msd
     inputfile: contains lattice vectors and basis (atomic positions) in some standard format.
     format:    Format of the input file. For example 'vasp' for CONTCAR.
 """
-
+gamma = 0.01 # smear parameter for ploting spectrum, Lorentzian function
 file_in = sys.argv[1]
 format_in = sys.argv[2]
 msd      = float(sys.argv[3])   # in Angstroms
@@ -55,30 +54,34 @@ idx = argsort(ints[:,3])
 ints = ints[idx,:]
 gdat, ind, cnt = unique(ints[:,3].round(decimals=2),return_index=True,return_counts=True)
 
-q = linspace(0,10,800)
+q = linspace(0,7,7000)
 sf = 0.0*q
+
 
 final = empty([len(gdat),5])
 for i in range(len(gdat)):
-    final[i,0:4] = ints[ind[i],0:4]
     psum = 0.0
     for j in range(ind[i],ind[i]+cnt[i]):
         psum += ints[j,4]
-        sf += cauchy.pdf(q,gdat[i],0.01)*ints[j,4]
-    final[i,4] = psum
-
+    final[i,0:4] = ints[ind[i],0:4]
+    if i > 0 and psum > 4:
+        final[i,4] = psum
+        sf  += psum*(ff.lpdf(q,final[i,3],gamma))
 final[:,0:3] = -sort(-abs(final[:,0:3]))
+
 
 plt.interactive(True)
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 plt.xlim(1, 10)
 plt.yticks([])
-plt.plot(q,sf)
+maxvl = ff.lpdf(0.0,0.0,gamma)
+plt.plot(q,sf/maxvl)
+#plt.plot(final[:,3],final[:,4],'*')
 for i, p in enumerate(final[:,4]):
-    if p > 4:
+    if p > 20.00 and i < 13:
         lbl = '['+str(final[i,0].astype(int))+str(final[i,1].astype(int))+str(final[i,2].astype(int))+']'
-        plt.annotate(lbl, (final[i,3]+0.1, final[i,4]*30),rotation=90)
+        plt.annotate(lbl, (final[i,3], final[i,4]),rotation=90)
         print('{0:12.6f} '.format(final[i,4]),end='')
 print()
 plt.xlabel(r"q (\AA$^{-1}$)")

@@ -38,5 +38,7 @@ def pcff(sym):
 def gpdf(k,k0=0.0,sig=0.05):
     return exp(-power((k-k0)/sig,2)/2)
 
-def lpdf(k,k0=0.0,sig=0.05):
+# Coarse resolution distorts peak heights
+def lpdf(k,k0=0.0,sig=0.01):
     return  sig/(2*pi)*(1/((k-k0)**2+(0.5*sig)**2))
+
